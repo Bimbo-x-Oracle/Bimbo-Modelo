@@ -6,9 +6,9 @@ from sklearn.preprocessing import MinMaxScaler
 from datetime import datetime
 import random
 
-# TODO Definir directorios de input y output
-input_dir = "original_bimbo_data"
-output_dir = "output_data"
+# Definir directorios de input y output
+input_dir = "datasets/original_bimbo_data"
+output_dir = "datasets/output_data"
 
 """**Almacen**"""
 
@@ -36,7 +36,7 @@ def process_warehouse_data(file_path):
 
     return warehouse
 
-warehouse = process_warehouse_data("Existencia.csv")
+warehouse = process_warehouse_data(f"{input_dir}/Existencia.csv")
 warehouse
 
 """**Pendientes**"""
@@ -83,7 +83,7 @@ def process_pending_data(file_path):
 
     return df
 
-pending = process_pending_data("Pendientes.csv")
+pending = process_pending_data(f"{input_dir}/Pendientes.csv")
 pending
 
 """**Órdenes**"""
@@ -136,13 +136,13 @@ def process_demand_data(file_path):
     # Regresar los dos DataFrames
     return dfpk, dffp
 
-dfpk, dffp = process_demand_data('Ordenes.csv')
+dfpk, dffp = process_demand_data(f"{input_dir}/Ordenes.csv")
 dfpk
 
-warehouse.to_csv('warehouse_existencias_cleanformat.csv', encoding='utf-8', index=False)
-pending.to_csv('pending_camiones_cleanformat.csv', encoding='utf-8', index=False)
-dfpk.to_csv('dfpk_ordenes_picking_cleanformat.csv', encoding='utf-8', index=False)
-dffp.to_csv('dffp_ordenes_fullpallet_cleanformat.csv', encoding='utf-8', index=False)
+warehouse.to_csv(f'{output_dir}/warehouse_existencias_cleanformat.csv', encoding='utf-8', index=False)
+pending.to_csv(f'{output_dir}/pending_camiones_cleanformat.csv', encoding='utf-8', index=False)
+dfpk.to_csv(f'{output_dir}/dfpk_ordenes_picking_cleanformat.csv', encoding='utf-8', index=False)
+dffp.to_csv(f'{output_dir}/dffp_ordenes_fullpallet_cleanformat.csv', encoding='utf-8', index=False)
 
 """**Vaciar almacen**"""
 
@@ -185,15 +185,15 @@ def asignar_productos(dfpk, warehouse):
 
 # Procesar con ordenes picking
 # Carga los datasets (asegúrate de tener los archivos en la misma carpeta o de poner el path correcto)
-warehouse = pd.read_csv('warehouse_existencias_cleanformat.csv')
-dfpk = pd.read_csv('dfpk_ordenes_picking_cleanformat.csv')
+warehouse = pd.read_csv(f'{output_dir}/warehouse_existencias_cleanformat.csv')
+dfpk = pd.read_csv(f'{output_dir}/dfpk_ordenes_picking_cleanformat.csv')
 
 # Ejecutar el algoritmo
 dfpk_actualizado, warehouse_actualizado = asignar_productos(dfpk.copy(), warehouse.copy())
 
 # Devolver los datasets actualizados
-dfpk_actualizado.to_csv('dfpk_ordenes_picking_cleanformat_resta_existencias.csv', index=False)
-warehouse_actualizado.to_csv('warehouse_existencias_cleanformat_dfpk_processed.csv', index=False)
+dfpk_actualizado.to_csv(f'{output_dir}/dfpk_ordenes_picking_cleanformat_resta_existencias.csv', index=False)
+warehouse_actualizado.to_csv(f'{output_dir}/warehouse_existencias_cleanformat_dfpk_processed.csv', index=False)
 
 warehouse_actualizado.head()
 
@@ -236,15 +236,15 @@ def asignar_productos(dffp, warehouse):
 
 # Procesar con ordenes full pallet
 # Carga los datasets (asegúrate de tener los archivos en la misma carpeta o de poner el path correcto)
-warehouse = pd.read_csv('warehouse_existencias_cleanformat_dfpk_processed.csv')
-dffp = pd.read_csv('dffp_ordenes_fullpallet_cleanformat.csv')
+warehouse = pd.read_csv(f'{output_dir}/warehouse_existencias_cleanformat_dfpk_processed.csv')
+dffp = pd.read_csv(f'{output_dir}/dffp_ordenes_fullpallet_cleanformat.csv')
 
 # Ejecutar el algoritmo
 dffp_actualizado, warehouse_actualizado_2 = asignar_productos(dffp.copy(), warehouse.copy())
 
 # Devolver los datasets actualizados
-dffp_actualizado.to_csv('dffp_ordenes_fullpallet_cleanformat_resta_existencias.csv', index=False)
-warehouse_actualizado_2.to_csv('warehouse_existencias_cleanformat_dfpk_dffp_processed.csv', index=False)
+dffp_actualizado.to_csv(f'{output_dir}/dffp_ordenes_fullpallet_cleanformat_resta_existencias.csv', index=False)
+warehouse_actualizado_2.to_csv(f'{output_dir}/warehouse_existencias_cleanformat_dfpk_dffp_processed.csv', index=False)
 
 warehouse_actualizado_2.head()
 
@@ -264,13 +264,13 @@ def merge_and_sum_datasets(dffp, dfpk) -> pd.DataFrame:
 
     return merged_df
 
-dffp1 = pd.read_csv('dffp_ordenes_fullpallet_cleanformat_resta_existencias.csv')
-dfpk1 = pd.read_csv('dfpk_ordenes_picking_cleanformat_resta_existencias.csv')
+dffp1 = pd.read_csv(f'{output_dir}/dffp_ordenes_fullpallet_cleanformat_resta_existencias.csv')
+dfpk1 = pd.read_csv(f'{output_dir}/dfpk_ordenes_picking_cleanformat_resta_existencias.csv')
 
 orders = merge_and_sum_datasets(dffp.copy(), dfpk.copy())
 
 # Devolver los datasets actualizados
-orders.to_csv('orders_cleanformat_resta_existencias.csv', index=False) #demanda actualizada
+orders.to_csv(f'{output_dir}/orders_cleanformat_resta_existencias.csv', index=False) #demanda actualizada
 
 orders.head()
 
@@ -443,8 +443,8 @@ def algoritmo_genetico(camiones_df, demanda_df, num_bahias=9, num_generaciones=3
         print(f"Producto {nombres_productos[i]}: {max(sobrante, 0)} unidades sobrantes")
 
 # Cargar datasets
-pending1 = pd.read_csv('pending_camiones_cleanformat.csv')
-orders1 = pd.read_csv('orders_cleanformat_resta_existencias.csv')
+pending1 = pd.read_csv(f'{output_dir}/pending_camiones_cleanformat.csv')
+orders1 = pd.read_csv(f'{output_dir}/orders_cleanformat_resta_existencias.csv')
 
 # Ejecut
 algoritmo_genetico(pending1, orders1)
